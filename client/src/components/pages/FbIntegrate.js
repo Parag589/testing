@@ -8,7 +8,7 @@ const FBIntegrate = () => {
 
   const responseFacebook = async (response) => {
     try {
-      const name = response.name
+      const name = response.name;
       const backendResponse = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/exchangeToken`,
         {
@@ -17,8 +17,8 @@ const FBIntegrate = () => {
       );
       const longTermToken = backendResponse.data.access_token;
 
-       localStorage.setItem("access_token", longTermToken);
-       localStorage.setItem("name", name);
+      localStorage.setItem("access_token", longTermToken);
+      localStorage.setItem("name", name);
       setLongTermAccessToken(longTermToken);
       navigate("/manage");
       console.log("access_token:", longTermToken);

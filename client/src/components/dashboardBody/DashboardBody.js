@@ -127,13 +127,10 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Log the updated values after state has been updated
     console.log('First Unique ID:', uniqueId1);
     console.log('Second Unique ID:', uniqueId2);
   }, [uniqueId1, uniqueId2]);
-  // useEffect(() => {
   console.log("user1" + user1 + "user2" + user2);
-  //   }, []);
   return (
     <section className="flex w-full h-full text-gray-800">
       <div className="flex flex-col w-1/4">
