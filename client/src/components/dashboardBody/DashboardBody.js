@@ -5,6 +5,10 @@ import UserDetails from "../UserDetails/UserDetails";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+import io from "socket.io-client";
+
+const socket = io("http://localhost:8000");
+
 const Dashboard = () => {
   const [conversationData, setConversationData] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -72,6 +76,71 @@ const Dashboard = () => {
     };
 
     fetchConversationDetails();
+  }, []);
+
+
+
+  useEffect(() => {
+    // Listen for 'newMessage' events from the server
+    socket.on("newMessage", (data) => {
+      console.log("New message event received:", data);
+      const fetchConversationDetails = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL}/fetchConversationDetails`
+          );
+          const conversations = response.data.data;
+  
+          const formattedConversations = conversations
+            .map((conversation) => {
+              const participants = conversation.participants.data;
+              const messages = conversation.messages.data;
+              const senders = conversation.senders.data;
+              const conversationId = conversation.id;
+  
+              const sender = participants.find(
+                (participant) => participant.id === senders[0].id
+              );
+              const receiver = participants.find(
+                (participant) => participant.id === senders[1].id
+              );
+  
+              if (sender && receiver) {
+                const senderName = sender.name;
+                const senderId = sender.id;
+                const receiverId = receiver.id;
+                const lastMessage =
+                  messages.length > 0 ? messages[0].message : "No messages";
+                setuser1(senderId);
+                setuser2(receiverId);
+  
+                return {
+                  senderName,
+                  senderId,
+                  receiverId,
+                  lastMessage,
+                  conversationId,
+                };
+              }
+  
+              return null;
+            })
+            .filter(Boolean);
+  
+          setConversationData(formattedConversations);
+        } catch (error) {
+          console.error("Error fetching conversation details:", error.message);
+        }
+      };
+  
+      fetchConversationDetails();
+
+    });
+
+    return () => {
+      // Clean up the event listener when the component unmounts
+      socket.off("newMessage");
+    };
   }, []);
 
   useEffect(() => {

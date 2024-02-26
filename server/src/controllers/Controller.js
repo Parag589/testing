@@ -1,6 +1,7 @@
 require("dotenv").config();
 import axios from "axios";
 import Message from "../models/MessageModel";
+const io = require("socket.io")();
 
 const MY_VERIFY_TOKEN = process.env.MY_VERIFY_TOKEN;
 console.log(MY_VERIFY_TOKEN);
@@ -28,11 +29,13 @@ let getWebHook = (req, res) => {
 
 let postWebHook = async (req, res) => {
   let body = req.body;
+  io.emit("newMessage", { message: "New message received" });
+  console.log("new message");
 
-  if (body.object === "page") {
+   if (body.object === "page") {
     body.entry.forEach(async function (entry) {
       let webhook_event = entry.messaging[0];
-      console.log(webhook_event);
+      // console.log(webhook_event);
 
       if (webhook_event.message && webhook_event.message.text) {
         const receivedMessage = new Message({
@@ -42,6 +45,8 @@ let postWebHook = async (req, res) => {
           role: "client",
         });
         await receivedMessage.save();
+
+        // Emit a 'newMessage' event to connected clients
       } else {
         console.log("Received message does not contain text.");
       }
